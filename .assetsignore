@@ -1,0 +1,7 @@
+.git/
+.wrangler/
+.assetsignore
+wrangler.jsonc
+README.md
+server.mjs
+tests/
