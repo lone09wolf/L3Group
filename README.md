@@ -4,8 +4,8 @@ A responsive website with a dependency-free Node server for secure enquiry deliv
 
 ## Contact
 
-- Phone: +27 84 524 9087
-- Email: inquiry@i3group.co.za
+- Phone: +27 84 498 3650
+- Email: INQIURY@L3GROUP.CO.ZA
 - The enquiry form first posts to `/api/enquiry`. Configure `RESEND_API_KEY` and `L3_FROM_EMAIL` on a Node host to deliver enquiries directly. `L3_FROM_EMAIL` must use a sending domain verified by the email provider.
 - Without those environment variables or on static hosting, the form opens a prefilled email draft. Direct phone and email links remain available.
 - The server validates field lengths, escapes submitted text, limits request size, includes a hidden spam trap, and rate-limits repeated attempts by address.
@@ -29,6 +29,10 @@ node server.mjs
 ```
 
 Set `PORT` when the hosting platform provides a port. Keep `RESEND_API_KEY` in the host's secret environment settings, never in browser code or source control.
+
+The Projects page links to `assets/l3-group-company-portfolio.pdf`. This is a placeholder path; add the approved PDF at that exact path before advertising the download as available.
+
+Production enquiries require a Node host running `server.mjs`, outbound access to Resend, a valid `RESEND_API_KEY`, and `L3_FROM_EMAIL` on a domain verified with Resend. The server sends submissions to `INQIURY@L3GROUP.CO.ZA`. Confirm the recipient spelling and verify a real delivery in that inbox after deployment. A static host cannot run `/api/enquiry`; in that case the form offers a prefilled email draft that the visitor must send manually.
 
 ## Interaction
 

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const port = Number(process.env.PORT || 4173);
+const port = process.env.PORT === undefined ? 4173 : Number(process.env.PORT);
 const host = process.env.HOST || '0.0.0.0';
 const attempts = new Map();
 const types = {
@@ -16,6 +16,7 @@ const types = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
+  '.pdf': 'application/pdf',
 };
 
 function json(response, status, body) {
@@ -69,7 +70,7 @@ async function sendEnquiry(request, response) {
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: `L3 Group Website <${from}>`,
-      to: ['inquiry@i3group.co.za'],
+      to: ['INQIURY@L3GROUP.CO.ZA'],
       reply_to: email,
       subject: `Website enquiry: ${service}`,
       html: `<h2>New L3 Group enquiry</h2><p><strong>Name:</strong> ${escapeHtml(name)}</p><p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Location:</strong> ${escapeHtml(location)}</p><p><strong>Service:</strong> ${escapeHtml(service)}</p><p><strong>Project:</strong></p><p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>`,
@@ -95,7 +96,8 @@ async function serveFile(request, response) {
   }
 }
 
-http.createServer(async (request, response) => {
+export function createWebsiteServer() {
+  return http.createServer(async (request, response) => {
   try {
     if (request.method === 'POST' && request.url === '/api/enquiry') return await sendEnquiry(request, response);
     if (request.method !== 'GET' && request.method !== 'HEAD') return response.writeHead(405).end();
@@ -104,4 +106,9 @@ http.createServer(async (request, response) => {
     console.error(error);
     return json(response, 500, { error: 'Unexpected server error.' });
   }
-}).listen(port, host, () => console.log(`L3 Group website running on ${host}:${port}`));
+  });
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  createWebsiteServer().listen(port, host, () => console.log(`L3 Group website running on ${host}:${port}`));
+}
