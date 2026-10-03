@@ -95,7 +95,7 @@ if (slides.length) {
   }
 }
 
-if (galleryMarquee && !prefersReducedMotion) {
+if (galleryMarquee) {
   const track = galleryMarquee.querySelector(".archive-marquee__track");
   const group = galleryMarquee.querySelector("[data-gallery-group]");
 
@@ -106,15 +106,23 @@ if (galleryMarquee && !prefersReducedMotion) {
     copy.querySelectorAll("img").forEach((image) => { image.alt = ""; });
     track.append(copy);
     galleryMarquee.classList.add("is-ready");
-  }
 
-  galleryToggle?.addEventListener("click", () => {
-    const isPaused = galleryMarquee.classList.toggle("is-paused");
-    const label = isPaused ? "Resume gallery motion" : "Pause gallery motion";
-    galleryToggle.setAttribute("aria-label", label);
-    galleryToggle.title = label;
-    galleryToggle.querySelector("img").src = isPaused ? "assets/play.svg" : "assets/pause.svg";
-  });
+    const setGalleryPaused = (isPaused) => {
+      galleryMarquee.classList.toggle("is-paused", isPaused);
+      galleryMarquee.classList.toggle("is-user-playing", prefersReducedMotion && !isPaused);
+      if (!galleryToggle) return;
+      const label = isPaused ? "Resume gallery motion" : "Pause gallery motion";
+      galleryToggle.setAttribute("aria-label", label);
+      galleryToggle.title = label;
+      const icon = galleryToggle.querySelector("img");
+      if (icon) icon.src = isPaused ? "assets/play.svg" : "assets/pause.svg";
+    };
+
+    setGalleryPaused(prefersReducedMotion);
+    galleryToggle?.addEventListener("click", () => {
+      setGalleryPaused(!galleryMarquee.classList.contains("is-paused"));
+    });
+  }
 }
 
 if (tabs) {

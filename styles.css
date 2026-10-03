@@ -563,6 +563,10 @@ button {
   border-bottom-right-radius: 100px;
 }
 
+.value-image img {
+  object-position: center 20%;
+}
+
 .capability-strip {
   position: relative;
   z-index: 1;
@@ -986,12 +990,6 @@ button {
 @keyframes archive-marquee-scroll {
   to {
     transform: translateX(-50%);
-  }
-}
-
-@media (hover: hover) {
-  .archive-marquee__window:hover .archive-marquee__track {
-    animation-play-state: paused;
   }
 }
 
@@ -1420,12 +1418,13 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .archive-marquee__motion {
-    display: none;
+  .archive-marquee:not(.is-user-playing) .archive-marquee__track {
+    animation: none !important;
   }
 
-  .archive-marquee__track {
-    animation: none !important;
+  .archive-marquee.is-user-playing .archive-marquee__track {
+    animation-duration: 48s !important;
+    animation-iteration-count: infinite !important;
   }
 
   *,
