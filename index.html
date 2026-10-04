@@ -54,72 +54,41 @@
     </header>
 
     <main id="main">
-      <section class="hero-slider" aria-labelledby="hero-title" data-slider>
-        <div class="hero-slide is-active" data-slide>
-          <img
-            src="assets/residence.jpg"
-            alt="Modern luxury home with warm interior lighting and strong architectural lines."
-            fetchpriority="high"
-          />
-          <div class="hero-slide__shade"></div>
-          <div class="hero-slide__content">
-            <p class="hero-reveal">Construction | Consulting | Innovation</p>
-            <h1 id="hero-title" class="hero-reveal">Build Smarter. Deliver With Confidence.</h1>
-            <p class="hero-lead hero-reveal">
-              L3 Group supports homeowners, developers, and businesses with
-              construction delivery, project consulting, and practical innovation
-              from early planning through handover.
-            </p>
-            <div class="hero-actions hero-reveal">
+      <section class="hero-single hero-build" aria-labelledby="hero-title" data-hero-reveal>
+        <img
+          class="hero-single__image hero-build__before"
+          src="assets/hero/before-1672.webp"
+          srcset="assets/hero/before-640.webp 640w, assets/hero/before-1280.webp 1280w, assets/hero/before-1672.webp 1672w"
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          width="1672" height="941"
+          fetchpriority="high"
+        />
+        <img
+          class="hero-single__image hero-build__after"
+          src="assets/hero/after-1672.webp"
+          srcset="assets/hero/after-640.webp 640w, assets/hero/after-1280.webp 1280w, assets/hero/after-1672.webp 1672w"
+          sizes="100vw"
+          alt="Completed L3 Group homes, revealed from their construction stage"
+          width="1672" height="941"
+          fetchpriority="high"
+        />
+        <div class="container hero-single__content">
+          <div class="hero-build__copy">
+            <h1 id="hero-title">
+              <span class="visually-hidden">L3 Group.</span>
+              <svg class="hero-build__wordmark" viewBox="328 60 784 110" aria-hidden="true" focusable="false">
+                <image href="assets/l3-logo-clean.png" width="1112" height="262" />
+              </svg>
+              <span class="hero-build__tagline">Build better.</span>
+            </h1>
+            <p class="hero-build__intro">From first plans to finished places.</p>
+            <div class="hero-actions">
               <a class="button button--orange" href="contact.html">Start Your Project</a>
-              <a class="button button--glass" href="services.html">View Services</a>
+              <a class="button button--glass" href="projects.html">View Projects</a>
             </div>
           </div>
-        </div>
-
-        <div class="hero-slide" data-slide>
-          <img
-            src="assets/construction.jpg"
-            alt="Construction team coordinating on a large concrete site."
-          />
-          <div class="hero-slide__shade"></div>
-          <div class="hero-slide__content">
-            <p class="hero-reveal">Construction delivery</p>
-            <h2 class="hero-reveal">Complex Builds Need Clear Execution.</h2>
-            <p class="hero-lead hero-reveal">
-              Use L3 for disciplined site coordination, practical scheduling,
-              and a project team that keeps decisions moving.
-            </p>
-          </div>
-        </div>
-
-        <div class="hero-slide" data-slide>
-          <img
-            src="assets/residential.jpg"
-            alt="Contemporary residential exterior surrounded by trees."
-          />
-          <div class="hero-slide__shade"></div>
-          <div class="hero-slide__content">
-            <p class="hero-reveal">Consulting and innovation</p>
-            <h2 class="hero-reveal">Plan Better Before You Build.</h2>
-            <p class="hero-lead hero-reveal">
-              Bring construction insight into feasibility, budgeting,
-              procurement, and handover planning.
-            </p>
-          </div>
-        </div>
-
-        <button class="slider-arrow slider-arrow--prev" type="button" aria-label="Previous slide" data-slide-prev>
-          <span aria-hidden="true">&#8249;</span>
-        </button>
-        <button class="slider-arrow slider-arrow--next" type="button" aria-label="Next slide" data-slide-next>
-          <span aria-hidden="true">&#8250;</span>
-        </button>
-
-        <div class="slider-dots" aria-label="Hero slides">
-          <button class="is-active" type="button" aria-label="Show slide 1" data-slide-dot></button>
-          <button type="button" aria-label="Show slide 2" data-slide-dot></button>
-          <button type="button" aria-label="Show slide 3" data-slide-dot></button>
         </div>
       </section>
 
@@ -155,13 +124,25 @@
               <img
                 src="assets/portrait-01.png"
                 alt="L3 Group team member in a dark suit and blue tie."
+                loading="lazy"
                 decoding="async"
               />
             </div>
-            <div class="value-image value-image--overlap">
+            <div class="value-image value-image--offset">
+              <img
+                src="assets/portrait-03-960.webp"
+                srcset="assets/portrait-03-480.webp 480w, assets/portrait-03-960.webp 960w"
+                sizes="(max-width: 1100px) 30vw, 190px"
+                alt="L3 Group team member in a dark blazer."
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="value-image value-image--accent">
               <img
                 src="assets/portrait-02.png"
                 alt="L3 Group team member in a navy suit."
+                loading="lazy"
                 decoding="async"
               />
             </div>
@@ -199,38 +180,38 @@
         </div>
 
         <div class="container service-grid">
-          <article class="service-card" id="renovations" data-reveal>
-            <span class="service-icon">⌂</span>
+          <article class="service-card service-card--media" id="renovations" data-reveal>
+            <img class="service-card__photo" src="assets/projects/web/20210426_170038-640.webp" alt="Kitchen finishes with dark cabinetry" loading="lazy" />
             <h3>Renovations</h3>
             <p>Reimagined living and work spaces.</p>
             <a class="inline-link" href="services.html#renovations">Explore service ↗</a>
           </article>
-          <article class="service-card" id="residential-construction" data-reveal>
-            <span class="service-icon">▧</span>
+          <article class="service-card service-card--media" id="residential-construction" data-reveal>
+            <img class="service-card__photo" src="assets/site-media/photo-01-480.webp" alt="Multi-storey building works" loading="lazy" />
             <h3>Construction</h3>
             <p>New residential and commercial building work.</p>
             <a class="inline-link" href="services.html#construction">Explore service ↗</a>
           </article>
-          <article class="service-card" id="construction-consulting" data-reveal>
-            <span class="service-icon">◌</span>
+          <article class="service-card service-card--media" id="construction-consulting" data-reveal>
+            <img class="service-card__photo" src="assets/site-media/photo-23-480.webp" alt="Aerial view of a construction site" loading="lazy" />
             <h3>Construction Consulting</h3>
             <p>Advisory support for smarter decisions.</p>
             <a class="inline-link" href="services.html#consulting">Explore service ↗</a>
           </article>
-          <article class="service-card" data-reveal>
-            <span class="service-icon">✦</span>
+          <article class="service-card service-card--media" data-reveal>
+            <img class="service-card__photo" src="assets/site-media/photo-08-480.webp" alt="Building courtyard and roof structures" loading="lazy" />
             <h3>Design / Planning</h3>
             <p>Early brief and programme support.</p>
             <a class="inline-link" href="services.html#planning">Explore service ↗</a>
           </article>
-          <article class="service-card" id="project-coordination" data-reveal>
-            <span class="service-icon">╋</span>
+          <article class="service-card service-card--media" id="project-coordination" data-reveal>
+            <img class="service-card__photo" src="assets/site-media/photo-34-480.webp" alt="Site crew coordinating alongside heavy machinery" loading="lazy" />
             <h3>Project Coordination</h3>
             <p>Programme, procurement, and site alignment.</p>
             <a class="inline-link" href="services.html#coordination">Explore service ↗</a>
           </article>
-          <article class="service-card" data-reveal>
-            <span class="service-icon">▥</span>
+          <article class="service-card service-card--media" data-reveal>
+            <img class="service-card__photo" src="assets/site-media/photo-39-480.webp" alt="Excavation and ground preparation" loading="lazy" />
             <h3>Civil / Building Works</h3>
             <p>Site preparation, foundations and masonry.</p>
             <a class="inline-link" href="services.html#civil">Explore service ↗</a>
@@ -241,25 +222,35 @@
 
       <section class="proof-block section-dark" id="proof" aria-labelledby="proof-title">
         <div class="section-heading section-heading--center" data-reveal>
-          <p class="section-kicker">Project archive</p>
-          <h2 id="proof-title">Work, documented on site.</h2>
-          <p>Browse dated photographs from the L3 archive. Project identities and completion status are not published until confirmed.</p>
+          <p class="section-kicker">Selected work</p>
+          <h2 id="proof-title">Spaces. Structure. Site work.</h2>
+          <p>Explore residential work, building projects and civil groundwork from the L3 portfolio.</p>
         </div>
-        <div class="container archive-preview-grid">
-          <a class="archive-preview" href="projects/2021.html" data-reveal>
-            <img src="assets/projects/web/20210527_160940-1280.webp" alt="Row of modern townhouses in the 2021 photo archive" loading="lazy" />
-            <span class="archive-preview__meta">2021 photo record</span>
-            <strong>Residential work and finishes</strong>
-            <span class="text-link">View photographs <span aria-hidden="true">↗</span></span>
+        <div class="container project-records project-records--three">
+          <a class="archive-preview" href="projects/residential.html" data-reveal>
+            <img src="assets/site-media/photo-11-1600.webp" alt="White residential exterior and landscaped entrance" loading="lazy" />
+            <span class="archive-preview__meta">Residential</span><strong>Homes &amp; finishes</strong>
+            <span class="text-link">View collection &#8599;</span>
           </a>
-          <a class="archive-preview" href="projects/2022.html" data-reveal>
-            <img src="assets/projects/web/20220831_081237-1280.webp" alt="Brick buildings under construction in the 2022 photo archive" loading="lazy" />
-            <span class="archive-preview__meta">2022 photo record</span>
-            <strong>Structure and masonry</strong>
-            <span class="text-link">View photographs <span aria-hidden="true">↗</span></span>
+          <a class="archive-preview" href="projects/building-works.html" data-reveal>
+            <img src="assets/site-media/photo-01-1600.webp" alt="Multi-storey masonry building" loading="lazy" />
+            <span class="archive-preview__meta">Construction</span><strong>Building &amp; masonry</strong>
+            <span class="text-link">View collection &#8599;</span>
+          </a>
+          <a class="archive-preview" href="projects/civil-works.html" data-reveal>
+            <img src="assets/site-media/photo-23-1600.webp" alt="Aerial view of site preparation" loading="lazy" />
+            <span class="archive-preview__meta">Civil works</span><strong>Groundwork &amp; site operations</strong>
+            <span class="text-link">View collection &#8599;</span>
           </a>
         </div>
-        <div class="container section-link-row"><a class="text-link" href="projects.html">Explore projects <span aria-hidden="true">↗</span></a></div>
+        <div class="container section-link-row"><a class="text-link" href="projects.html">Explore projects &#8599;</a></div>
+      </section>
+
+      <section class="content-band content-band--light home-site-film" aria-labelledby="home-film-title">
+        <div class="container content-split">
+          <div><p class="section-kicker">A closer perspective</p><h2 id="home-film-title">See the work from site.</h2><p class="copy-lead">A look beyond the still photographs, into the spaces taking shape.</p><a class="inline-link" href="projects.html#site-films">More site footage &#8599;</a></div>
+          <video controls playsinline preload="none" poster="assets/site-media/photo-23-1600.webp" aria-label="L3 Group aerial site overview"><source src="assets/site-media/site-film-1.mp4" type="video/mp4" /><a href="assets/site-media/site-film-1.mp4">Watch aerial site overview</a></video>
+        </div>
       </section>
 
       <section class="cta-strip" aria-label="Project call to action">
@@ -287,40 +278,33 @@
         <div class="archive-marquee__window">
           <div class="archive-marquee__track">
             <div class="archive-marquee__group" data-gallery-group>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20210426_170038-640.webp" alt="Contemporary kitchen with dark cabinetry and a white island" decoding="async" />
-                <figcaption><strong>Residential finishes</strong><span>2021</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20210513_171422-640.webp" alt="Construction crew working in foundation trenches" decoding="async" />
-                <figcaption><strong>Foundation work</strong><span>2021</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20210524_115830-640.webp" alt="Workers building the exterior of a residential development" decoding="async" />
-                <figcaption><strong>Residential construction</strong><span>2021</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20210527_160940-640.webp" alt="Completed row of modern townhouses" decoding="async" />
-                <figcaption><strong>Townhouse exteriors</strong><span>2021</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20220714_120517-640.webp" alt="Groundwork prepared for a concrete slab" decoding="async" />
-                <figcaption><strong>Slab preparation</strong><span>2022</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20220824_172109-640.webp" alt="Concrete delivery truck and crane at a construction site" decoding="async" />
-                <figcaption><strong>Site operations</strong><span>2022</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20220831_081213-640.webp" alt="Brick structure under construction beside a paved road" decoding="async" />
-                <figcaption><strong>Structure and masonry</strong><span>2022</span></figcaption>
-              </figure>
-              <figure class="archive-marquee__item">
-                <img src="assets/projects/web/20220831_081237-640.webp" alt="Wide view of brick buildings taking shape" decoding="async" />
-                <figcaption><strong>Building progress</strong><span>2022</span></figcaption>
-              </figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-11-480.webp" alt="White residential facade and entrance" decoding="async" /><figcaption><strong>Residential exteriors</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-01-480.webp" alt="Multi-storey masonry building" decoding="async" /><figcaption><strong>Building works</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-07-480.webp" alt="Construction team beneath roof framing" decoding="async" /><figcaption><strong>Work on site</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-23-480.webp" alt="Aerial overview of earthworks" decoding="async" /><figcaption><strong>Ground preparation</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-32-480.webp" alt="Grader at work on the site surface" decoding="async" /><figcaption><strong>Site operations</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-39-480.webp" alt="Excavator beside a foundation trench" decoding="async" /><figcaption><strong>Excavation</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-10-480.webp" alt="White home with a red front door" decoding="async" /><figcaption><strong>Finishing details</strong></figcaption></figure>
+              <figure class="archive-marquee__item"><img src="assets/site-media/photo-27-480.webp" alt="Aerial view of prepared construction ground" decoding="async" /><figcaption><strong>A view from above</strong></figcaption></figure>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="credentials-band" aria-labelledby="credentials-title">
+        <div class="container credentials-band__inner">
+          <div class="credentials-band__copy">
+            <p class="section-kicker">L3 Group credentials</p>
+            <h2 id="credentials-title">Certifications &amp; registrations</h2>
+          </div>
+          <img
+            src="assets/certifications.png?v=logo-collection"
+            alt="Certification and registration artwork supplied by L3 Group"
+            width="1464"
+            height="1075"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </section>
 
@@ -357,13 +341,13 @@
         <div class="footer-links footer-contact">
           <h3>Get in touch</h3>
           <a href="tel:+27844983650">+27 84 498 3650</a>
-          <a href="mailto:INQIURY@L3GROUP.CO.ZA">INQIURY@L3GROUP.CO.ZA</a>
+          <a href="mailto:INQUIRY@L3GROUP.CO.ZA">INQUIRY@L3GROUP.CO.ZA</a>
           <p>Tell us your location, project scope and ideal timeframe.</p>
         </div>
       </div>
 
       <div class="container footer-bottom">
-        <p>© 2026 L3 Group</p>
+        <p>© L3 Group</p>
         <p>Construction | Consulting | Innovation</p>
       </div>
     </footer>
@@ -373,5 +357,6 @@
     </button>
 
     <script src="script.js"></script>
+    <script src="media-gallery.js"></script>
   </body>
 </html>

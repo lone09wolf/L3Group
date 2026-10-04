@@ -5,18 +5,36 @@ const nav = document.querySelector("[data-nav]");
 const header = document.querySelector("[data-header]");
 const revealItems = document.querySelectorAll("[data-reveal]");
 const backToTop = document.querySelector("[data-back-to-top]");
-const slides = Array.from(document.querySelectorAll("[data-slide]"));
-const dots = Array.from(document.querySelectorAll("[data-slide-dot]"));
-const nextButton = document.querySelector("[data-slide-next]");
-const prevButton = document.querySelector("[data-slide-prev]");
 const tabs = document.querySelector("[data-tabs]");
 const galleryMarquee = document.querySelector("[data-gallery-marquee]");
 const galleryToggle = document.querySelector("[data-gallery-toggle]");
-const enquiryForm = document.querySelector("[data-enquiry-form]");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let activeSlide = 0;
-let slideTimer;
+const heroReveal = document.querySelector("[data-hero-reveal]");
+if (heroReveal) {
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let revealRun = 0;
+  const replayHero = async () => {
+    const run = ++revealRun;
+    heroReveal.classList.remove("is-preparing", "is-revealing");
+    if (motionPreference.matches) return;
+    heroReveal.classList.add("is-preparing");
+    await Promise.all([...heroReveal.querySelectorAll(".hero-single__image")].map((image) => image.decode().catch(() => {})));
+    if (run !== revealRun || motionPreference.matches) return;
+    heroReveal.classList.remove("is-preparing");
+    // Restart the reveal on fresh loads and back-forward cache restores.
+    void heroReveal.offsetWidth;
+    heroReveal.classList.add("is-revealing");
+  };
+  if (!motionPreference.matches) heroReveal.classList.add("is-preparing");
+  window.addEventListener("pageshow", replayHero);
+  motionPreference.addEventListener("change", () => {
+    if (motionPreference.matches) {
+      revealRun++;
+      heroReveal.classList.remove("is-preparing", "is-revealing");
+    }
+  });
+}
 
 function closeMenu() {
   if (!navToggle || !nav) return;
@@ -24,24 +42,6 @@ function closeMenu() {
   navToggle.setAttribute("aria-label", "Open navigation");
   nav.classList.remove("is-open");
   document.body.classList.remove("nav-open");
-}
-
-function showSlide(index) {
-  if (!slides.length) return;
-  activeSlide = (index + slides.length) % slides.length;
-
-  slides.forEach((slide, slideIndex) => {
-    slide.classList.toggle("is-active", slideIndex === activeSlide);
-  });
-
-  dots.forEach((dot, dotIndex) => {
-    dot.classList.toggle("is-active", dotIndex === activeSlide);
-  });
-}
-
-function restartSlider() {
-  window.clearInterval(slideTimer);
-  slideTimer = window.setInterval(() => showSlide(activeSlide + 1), 6500);
 }
 
 if (navToggle && nav) {
@@ -70,29 +70,6 @@ if (header || backToTop) {
 
   updateScrollState();
   window.addEventListener("scroll", updateScrollState, { passive: true });
-}
-
-if (slides.length) {
-  nextButton?.addEventListener("click", () => {
-    showSlide(activeSlide + 1);
-    restartSlider();
-  });
-
-  prevButton?.addEventListener("click", () => {
-    showSlide(activeSlide - 1);
-    restartSlider();
-  });
-
-  dots.forEach((dot, index) => {
-    dot.addEventListener("click", () => {
-      showSlide(index);
-      restartSlider();
-    });
-  });
-
-  if (!prefersReducedMotion) {
-    restartSlider();
-  }
 }
 
 if (galleryMarquee) {
@@ -149,47 +126,6 @@ if (tabs) {
 backToTop?.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
 });
-
-if (enquiryForm) {
-  const requestedService = new URLSearchParams(window.location.search).get("service");
-  const serviceSelect = enquiryForm.elements.namedItem("service");
-  if (requestedService && serviceSelect instanceof HTMLSelectElement) {
-    const match = Array.from(serviceSelect.options).find((option) => option.value === requestedService);
-    if (match) serviceSelect.value = match.value;
-  }
-
-  enquiryForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!enquiryForm.reportValidity()) return;
-
-    const status = enquiryForm.querySelector("[data-form-status]");
-    const submit = enquiryForm.querySelector('button[type="submit"]');
-    const data = Object.fromEntries(new FormData(enquiryForm));
-    submit.disabled = true;
-    status.textContent = "Sending your enquiry...";
-
-    try {
-      const response = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error(`Delivery failed (${response.status})`);
-      status.textContent = "Thanks. Your enquiry has been sent.";
-      enquiryForm.reset();
-    } catch {
-      const subject = encodeURIComponent(`L3 Group enquiry: ${data.service}`);
-      const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\nLocation: ${data.location}\nService: ${data.service}\n\nProject:\n${data.message}`);
-      const fallback = document.createElement("a");
-      fallback.href = `mailto:INQIURY@L3GROUP.CO.ZA?subject=${subject}&body=${body}`;
-      fallback.textContent = "Open an email draft";
-      fallback.className = "inline-link";
-      status.replaceChildren("The online form is unavailable. ", fallback, " to send your enquiry directly.");
-    } finally {
-      submit.disabled = false;
-    }
-  });
-}
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver(

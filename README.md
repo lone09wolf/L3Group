@@ -1,26 +1,29 @@
 # L3 Group
 
-A responsive website with a dependency-free Node server for secure enquiry delivery. The visual site also works on a static host; in that mode, the enquiry form opens a prepared email draft.
+A responsive website with Cloudflare Workers hosting, server-verified Turnstile protection, and Resend enquiry delivery. A dependency-free Node server provides the same enquiry API locally. Static-only hosting can display the site but cannot send enquiries.
 
 ## Contact
 
 - Phone: +27 84 498 3650
-- Email: INQIURY@L3GROUP.CO.ZA
-- The enquiry form first posts to `/api/enquiry`. Configure `RESEND_API_KEY` and `L3_FROM_EMAIL` on a Node host to deliver enquiries directly. `L3_FROM_EMAIL` must use a sending domain verified by the email provider.
-- Without those environment variables or on static hosting, the form opens a prefilled email draft. Direct phone and email links remain available.
-- The server validates field lengths, escapes submitted text, limits request size, includes a hidden spam trap, and rate-limits repeated attempts by address.
+- Email: INQUIRY@L3GROUP.CO.ZA (Namecheap mailbox).
+- The form posts to `/api/enquiry`. The recipient is configured server-side; visitors cannot choose another destination. The verified sending address is used as From, and the visitor's email is Reply-To.
+- The endpoint verifies every Turnstile token's success, hostname, and action before contacting Resend. It rejects cross-origin requests, invalid fields, and bodies over 12 KB, and includes a hidden spam trap.
+- Cloudflare's rate-limit binding limits attempts to five per minute per IP, per Cloudflare location. The local Node server uses a bounded in-memory limiter. These limits are abuse controls, not a global quota or standalone DDoS protection.
+- Identical messages use a Resend idempotency key to prevent duplicate emails for the provider's 24-hour retention window. No automatic provider retry is performed.
+- Missing configuration disables online submission honestly. Direct phone, WhatsApp, and email links remain available. A successful response means Resend accepted the message, not that inbox delivery has been verified.
+- See [ENQUIRY-SETUP.md](ENQUIRY-SETUP.md) for activation and testing.
 
 ## Content
 
-The 14 construction photographs, logo and contact details were supplied by the owner. The site uses the original photographs, with no generated additions or retouching. Photo dates follow their source filenames. The screenshot is labelled as an archive copy, not a separate progress milestone.
+The owner-supplied media is organized into residential, building and masonry, and civil-work collections. The WhatsApp collection contributes 39 photographs and two site videos. Public captions, page titles and footers are date-free. Legacy year-based project URLs redirect to the descriptive collection pages.
 
-The 2021 and 2022 photographs are presented as separate site records. No project name, location, building count, certification or handover status is inferred. Stages may show different units or work areas. Demo project lists and unverified metrics have been removed in favour of the real photographs.
+Captions describe the visible work. No project name, location, building count or handover date is inferred from a filename. Stages may show different units or work areas.
 
 ## Assets
 
-The live page serves the owner's construction photographs from `assets/projects/`. Gallery photographs load on demand; the full source frame is preserved in the project viewer, and each featured photo links to its full-size file. The consulting service uses `assets/drawings.jpg` as an explicitly labelled illustrative placeholder. Other earlier stock images remain in the asset folder but are not referenced by the page. Lucide's license is included in `assets/lucide-LICENSE`. The typography uses the visitor's native system font stack, so no web font blocks rendering.
+New media is served from `assets/site-media/`. Each photograph has 480-pixel and 1600-pixel WebP copies, without enlarging smaller originals. Gallery thumbnails load on demand; the photo viewer preserves the full frame and supports previous/next controls, arrow keys and Escape. The original townhouse hero and kitchen finishes remain in `assets/projects/`. Lucide's license is included in `assets/lucide-LICENSE`.
 
-Responsive WebP copies are stored in `assets/projects/web/` at 640, 1280 and 1920 pixels. The browser chooses an appropriate size while the original JPG remains available from the full-size link.
+The townhouse hero uses owner-supplied before/after photographs, with responsive WebP copies in `assets/hero/`. Its wordmark displays the lettering from the original logo asset. Videos use native playback controls, load only on demand and never autoplay. The Node server supports byte-range requests for playback and seeking. All imported media files are below the Workers static-asset size limit.
 
 ## Run
 
@@ -28,12 +31,12 @@ Responsive WebP copies are stored in `assets/projects/web/` at 640, 1280 and 192
 node server.mjs
 ```
 
-Set `PORT` when the hosting platform provides a port. Keep `RESEND_API_KEY` in the host's secret environment settings, never in browser code or source control.
+Set `PORT` when the hosting platform provides a port. For a configured local form, put the settings from `.dev.vars.example` in an ignored `.env` file and run `node --env-file=.env server.mjs`. Use Node 22 or later. Never put secret keys in browser code or source control. The server does not serve dotfiles, tests, or backend modules.
 
 The Projects page links to `assets/l3-group-company-portfolio.pdf`. This is a placeholder path; add the approved PDF at that exact path before advertising the download as available.
 
-Production enquiries require a Node host running `server.mjs`, outbound access to Resend, a valid `RESEND_API_KEY`, and `L3_FROM_EMAIL` on a domain verified with Resend. The server sends submissions to `INQIURY@L3GROUP.CO.ZA`. Confirm the recipient spelling and verify a real delivery in that inbox after deployment. A static host cannot run `/api/enquiry`; in that case the form offers a prefilled email draft that the visitor must send manually.
+Production uses `worker.mjs`, the ASSETS binding, and Worker-first routing for `/api/*` in `wrangler.jsonc`. The deploy command remains `npx wrangler deploy`; no site build command is needed. Set all form credentials on the Worker before deployment, then send a real test and confirm receipt in the Namecheap inbox. `.assetsignore` excludes backend modules, secrets, and development files from public asset uploads.
 
 ## Interaction
 
-The logo scales within a fixed header. The static hero uses a brief text reveal, while below-the-fold sections reveal as they enter view. Reduced-motion preferences disable these animations. The mobile menu supports keyboard focus, Escape, and background interaction blocking. Service links preselect the relevant enquiry option; project records and frequently asked questions expand on demand.
+The logo scales within a fixed header. The homepage hero holds on the construction photograph for one second, then fades smoothly to the finished homes over one second and remains still. The reveal replays on page loads and back-forward restores; reduced-motion visitors see the completed image immediately. Three spaced, staggered team portraits retain the orange accents and curved corners in the Why L3 section. The separate gallery strip moves right to left and offers a pause control. Reduced-motion preferences disable automatic gallery motion. The mobile menu supports keyboard focus, Escape, and background interaction blocking. Service links preselect the relevant enquiry option.
