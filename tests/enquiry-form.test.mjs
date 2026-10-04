@@ -91,10 +91,10 @@ test('delivery failures preserve input and never claim success', async () => {
 });
 
 test('missing configuration disables the form and explains direct contact', async () => {
-  const form = await harness({ config: Response.json({ error: 'Please email INQUIRY@L3GROUP.CO.ZA.' }, { status: 503 }) });
+  const form = await harness({ config: Response.json({ error: 'Please email inquiries@l3group.co.za.' }, { status: 503 }) });
   assert.equal(form.submit.disabled, true);
   assert.equal(form.options(), undefined);
-  assert.match(form.verificationStatus.textContent, /INQUIRY@L3GROUP.CO.ZA/);
+  assert.match(form.verificationStatus.textContent, /inquiries@l3group.co.za/);
   assert.equal(form.retry.hidden, false);
 });
 

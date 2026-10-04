@@ -4,8 +4,8 @@ const SERVICES = new Set([
 ]);
 const BODY_LIMIT = 12_000;
 const EMAIL = /^[^\s@<>\x00-\x1f\x7f]+@[^\s@<>\x00-\x1f\x7f]+\.[^\s@<>\x00-\x1f\x7f]+$/;
-const DEFAULT_RECIPIENT = 'INQUIRY@L3GROUP.CO.ZA';
-const UNAVAILABLE = 'Online enquiries are temporarily unavailable. Please email INQUIRY@L3GROUP.CO.ZA or call +27 84 498 3650.';
+const DEFAULT_RECIPIENT = 'inquiries@l3group.co.za';
+const UNAVAILABLE = 'Online enquiries are temporarily unavailable. Please email inquiries@l3group.co.za or call +27 84 498 3650.';
 
 export function jsonResponse(status, body, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -158,7 +158,7 @@ export async function handleEnquiry(request, env, { clientIp, rateLimit, fetcher
     if (typeof delivery?.id !== 'string' || !delivery.id) throw new Error('Missing delivery reference');
     return jsonResponse(200, { ok: true });
   } catch {
-    return jsonResponse(502, { error: 'We could not confirm your email was sent. Please try again or email INQUIRY@L3GROUP.CO.ZA directly.' });
+    return jsonResponse(502, { error: 'We could not confirm your email was sent. Please try again or email inquiries@l3group.co.za directly.' });
   }
 }
 

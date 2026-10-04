@@ -46,7 +46,7 @@ document.querySelector("[data-shell-footer]")?.insertAdjacentHTML("afterend", `
         <a href="${link("services.html#construction")}">Construction</a><a href="${link("services.html#renovations")}">Renovations</a><a href="${link("services.html#civil")}">Civil / Building Works</a><a href="${link("services.html#planning")}">Design / Planning</a>
       </nav>
       <div class="footer-links footer-contact"><h3>Get in touch</h3>
-        <a href="tel:+27844983650">+27 84 498 3650</a><a href="mailto:INQUIRY@L3GROUP.CO.ZA">INQUIRY@L3GROUP.CO.ZA</a><p>Western Cape, South Africa. Projects elsewhere by arrangement.</p>
+        <a href="tel:+27844983650">+27 84 498 3650</a><a href="mailto:inquiries@l3group.co.za">inquiries@l3group.co.za</a><p>Western Cape, South Africa. Projects elsewhere by arrangement.</p>
       </div>
     </div>
     <div class="container footer-bottom"><p>© L3 Group</p><p>Construction | Consulting | Innovation</p></div>

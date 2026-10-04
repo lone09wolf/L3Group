@@ -11,7 +11,7 @@
     "run_worker_first": ["/api/*"]
   },
   "vars": {
-    "L3_TO_EMAIL": "INQUIRY@L3GROUP.CO.ZA"
+    "L3_TO_EMAIL": "inquiries@l3group.co.za"
   },
   "ratelimits": [
     {

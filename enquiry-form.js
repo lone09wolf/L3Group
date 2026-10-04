@@ -122,7 +122,7 @@
       form.reset();
     } catch (error) {
       status.textContent = error.name === 'TimeoutError' || error.name === 'TypeError'
-        ? 'We could not confirm your enquiry was sent. Your details are still here. Please retry or email INQUIRY@L3GROUP.CO.ZA.'
+        ? 'We could not confirm your enquiry was sent. Your details are still here. Please retry or email inquiries@l3group.co.za.'
         : error.message;
     } finally {
       sending = false;

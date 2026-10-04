@@ -5,7 +5,7 @@ A responsive website with Cloudflare Workers hosting, server-verified Turnstile 
 ## Contact
 
 - Phone: +27 84 498 3650
-- Email: INQUIRY@L3GROUP.CO.ZA (Namecheap mailbox).
+- Email: inquiries@l3group.co.za (Namecheap mailbox).
 - The form posts to `/api/enquiry`. The recipient is configured server-side; visitors cannot choose another destination. The verified sending address is used as From, and the visitor's email is Reply-To.
 - The endpoint verifies every Turnstile token's success, hostname, and action before contacting Resend. It rejects cross-origin requests, invalid fields, and bodies over 12 KB, and includes a hidden spam trap.
 - Cloudflare's rate-limit binding limits attempts to five per minute per IP, per Cloudflare location. The local Node server uses a bounded in-memory limiter. These limits are abuse controls, not a global quota or standalone DDoS protection.

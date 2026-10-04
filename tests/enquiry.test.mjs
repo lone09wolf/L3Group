@@ -8,7 +8,7 @@ import worker from '../worker.mjs';
 
 const env = {
   RESEND_API_KEY: 'test-email-secret', L3_FROM_EMAIL: 'website@forms.example.com',
-  L3_TO_EMAIL: 'INQUIRY@L3GROUP.CO.ZA',
+  L3_TO_EMAIL: 'inquiries@l3group.co.za',
   TURNSTILE_SITE_KEY: 'test-public-site-key', TURNSTILE_SECRET_KEY: 'test-captcha-secret',
 };
 const enquiry = {
@@ -42,7 +42,7 @@ test('verifies CAPTCHA before sending only to the configured mailbox', async () 
   assert.deepEqual(calls[0].data, { secret: env.TURNSTILE_SECRET_KEY, response: 'test-token', remoteip: '192.0.2.1' });
   assert.equal(calls[1].endpoint, 'https://api.resend.com/emails');
   assert.equal(calls[1].options.headers.Authorization, `Bearer ${env.RESEND_API_KEY}`);
-  assert.deepEqual(calls[1].data.to, ['INQUIRY@L3GROUP.CO.ZA']);
+  assert.deepEqual(calls[1].data.to, ['inquiries@l3group.co.za']);
   assert.equal(calls[1].data.from, 'L3 Group Website <website@forms.example.com>');
   assert.equal(calls[1].data.reply_to, enquiry.email);
   assert.match(calls[1].data.html, /&lt;script&gt;bad\(\)&lt;\/script&gt;<br>Next line/);
@@ -50,12 +50,12 @@ test('verifies CAPTCHA before sending only to the configured mailbox', async () 
   assert.match(calls[1].data.text, /Next line/);
 });
 
-test('default mailbox uses the human-confirmed INQUIRY spelling', async () => {
+test('default mailbox uses the human-confirmed production mailbox', async () => {
   const config = { ...env };
   delete config.L3_TO_EMAIL;
   const { send, calls } = harness({ config });
   await send(request());
-  assert.deepEqual(calls[1].data.to, ['INQUIRY@L3GROUP.CO.ZA']);
+  assert.deepEqual(calls[1].data.to, ['inquiries@l3group.co.za']);
 });
 
 test('server environment can configure the destination; submitted recipient cannot', async () => {
@@ -212,7 +212,7 @@ test('Node adapter sends to the corrected mailbox and never exposes development 
   const origin = `http://127.0.0.1:${server.address().port}`;
   try {
     assert.equal((await fetch(`${origin}/api/enquiry`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: origin }, body: JSON.stringify(enquiry) })).status, 200);
-    assert.deepEqual(sent[0].to, ['INQUIRY@L3GROUP.CO.ZA']);
+    assert.deepEqual(sent[0].to, ['inquiries@l3group.co.za']);
     for (const pathname of ['/.env', '/.dev.vars', '/.git/config', '/server.mjs', '/worker.mjs', '/enquiry.mjs', '/tests/hero.test.mjs', '/ENQUIRY-SETUP.md']) {
       assert.equal((await fetch(origin + pathname)).status, 404, pathname);
     }

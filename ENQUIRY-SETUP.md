@@ -2,9 +2,9 @@
 
 ## Mailbox and sending service
 
-The receiving mailbox is `INQUIRY@L3GROUP.CO.ZA`, hosted by Namecheap. Keep its existing MX records. A mailbox alone does not execute the website's email handler: Cloudflare runs the Worker, and the existing Resend integration sends to the mailbox over HTTPS. No Namecheap mailbox password is needed by this implementation.
+The receiving mailbox is `inquiries@l3group.co.za`, hosted by Namecheap. Keep its existing MX records. A mailbox alone does not execute the website's email handler: Cloudflare runs the Worker, and the existing Resend integration sends to the mailbox over HTTPS. No Namecheap mailbox password is needed by this implementation.
 
-1. Confirm the `INQUIRY` mailbox exists in Namecheap and receives ordinary email.
+1. Confirm the `inquiries` mailbox exists in Namecheap and receives ordinary email.
 2. In Resend, verify a sending domain or subdomain you control, for example `forms.l3group.co.za`. Add only the DNS records Resend specifies for that sending domain/subdomain. Do not replace the main domain's Namecheap MX records. Coordinate SPF/DKIM changes with the existing DNS setup; do not create duplicate SPF records at the same hostname.
 3. Create a sending-only Resend API key scoped to that domain. Choose a verified sender, for example `website@forms.l3group.co.za`.
 
@@ -24,7 +24,7 @@ In Cloudflare, open Workers & Pages > l3group > Settings > Variables and Secrets
 | `TURNSTILE_SECRET_KEY` | Secret | The real widget secret |
 | `TURNSTILE_SITE_KEY` | Secret or text | The real public site key |
 | `L3_FROM_EMAIL` | Secret or text | The verified sender address |
-| `L3_TO_EMAIL` | Text | `INQUIRY@L3GROUP.CO.ZA` (already in wrangler.jsonc) |
+| `L3_TO_EMAIL` | Text | `inquiries@l3group.co.za` (already in wrangler.jsonc) |
 
 For CLI setup, from this repository run:
 
