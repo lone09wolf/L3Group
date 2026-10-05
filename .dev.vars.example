@@ -1,0 +1,6 @@
+# Local configuration only. Never commit real keys.
+RESEND_API_KEY=
+L3_FROM_EMAIL=
+L3_TO_EMAIL=inquiries@l3group.co.za
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=

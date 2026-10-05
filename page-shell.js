@@ -22,6 +22,15 @@ document.querySelector("[data-shell-header]")?.insertAdjacentHTML("afterend", `
 document.querySelector("[data-shell-header]")?.remove();
 
 document.querySelector("[data-shell-footer]")?.insertAdjacentHTML("afterend", `
+  <section class="credentials-band" aria-labelledby="credentials-title">
+    <div class="container credentials-band__inner">
+      <div class="credentials-band__copy">
+        <p class="section-kicker">L3 Group credentials</p>
+        <h2 id="credentials-title">Certifications &amp; registrations</h2>
+      </div>
+      <img src="${link("assets/certifications.png")}?v=logo-collection" alt="Certification and registration artwork supplied by L3 Group" width="1464" height="1075" loading="lazy" decoding="async" />
+    </div>
+  </section>
   <footer class="contact-footer" aria-labelledby="contact-title">
     <div class="container footer-main">
       <div class="footer-intro">
@@ -37,10 +46,10 @@ document.querySelector("[data-shell-footer]")?.insertAdjacentHTML("afterend", `
         <a href="${link("services.html#construction")}">Construction</a><a href="${link("services.html#renovations")}">Renovations</a><a href="${link("services.html#civil")}">Civil / Building Works</a><a href="${link("services.html#planning")}">Design / Planning</a>
       </nav>
       <div class="footer-links footer-contact"><h3>Get in touch</h3>
-        <a href="tel:+27844983650">+27 84 498 3650</a><a href="mailto:INQIURY@L3GROUP.CO.ZA">INQIURY@L3GROUP.CO.ZA</a><p>Western Cape, South Africa. Projects elsewhere by arrangement.</p>
+        <a href="tel:+27844983650">+27 84 498 3650</a><a href="mailto:inquiries@l3group.co.za">inquiries@l3group.co.za</a><p>Western Cape, South Africa. Projects elsewhere by arrangement.</p>
       </div>
     </div>
-    <div class="container footer-bottom"><p>© 2026 L3 Group</p><p>Construction | Consulting | Innovation</p></div>
+    <div class="container footer-bottom"><p>© L3 Group</p><p>Construction | Consulting | Innovation</p></div>
   </footer>
   <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top>↑</button>
 `);

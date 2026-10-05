@@ -1,0 +1,15 @@
+# Preserve old links while consolidating canonical URLs.
+/index.html / 301
+/about.html /about 301
+/services.html /services 301
+/projects.html /projects 301
+/portfolio.html /portfolio 301
+/contact.html /contact 301
+/projects/residential.html /projects/residential 301
+/projects/building-works.html /projects/building-works 301
+/projects/civil-works.html /projects/civil-works 301
+/index / 301
+/projects/2021.html /projects/residential 301
+/projects/2021 /projects/residential 301
+/projects/2022.html /projects/building-works 301
+/projects/2022 /projects/building-works 301
