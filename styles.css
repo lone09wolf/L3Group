@@ -517,8 +517,10 @@ button {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.1rem;
+  gap: .85rem;
   align-items: start;
+  width: min(100%, 460px);
+  justify-self: center;
   padding-block: 1.5rem;
 }
 
@@ -538,12 +540,12 @@ button {
 }
 
 .value-image--offset {
-  margin-top: 3rem;
+  margin-top: 2rem;
   border-bottom-right-radius: 56px;
 }
 
 .value-image--accent {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   border-top-right-radius: 56px;
   border-bottom-left-radius: 56px;
 }

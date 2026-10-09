@@ -10,9 +10,9 @@ The receiving mailbox is `inquiries@l3group.co.za`, hosted by Namecheap. Keep it
 
 ## CAPTCHA
 
-In Cloudflare, create a Managed Turnstile widget. Add each public hostname on which the contact form is available, including `l3group.co.za`, `www.l3group.co.za`, or the actual workers.dev hostname as applicable. Use the real public site key and secret key. The code checks the token against the request's hostname and the `enquiry` action.
+Create a reCAPTCHA v3 (score-based) site key and secret for each public hostname that serves the contact form, such as `l3group.co.za` and `www.l3group.co.za`. If you use a workers.dev preview, register that hostname too or use a separate testing key. This is the classic reCAPTCHA v3 site/secret integration using Google's SiteVerify endpoint, not a Turnstile widget or reCAPTCHA Enterprise API key. The form obtains a fresh token on submission; the Worker verifies its hostname, `enquiry` action, and score (minimum 0.5) before sending mail. The Google badge remains visible as required by the service.
 
-Public always-pass dummy keys are deliberately rejected by the application configuration. Automated tests mock the verification and email APIs instead; there is no production CAPTCHA bypass.
+Automated tests mock the verification and email APIs; they do not bypass production verification. Do not paste the secret into source code or chat.
 
 ## Worker settings
 
@@ -21,17 +21,18 @@ In Cloudflare, open Workers & Pages > l3group > Settings > Variables and Secrets
 | Setting | Type | Value |
 | --- | --- | --- |
 | `RESEND_API_KEY` | Secret | The sending-only API key |
-| `TURNSTILE_SECRET_KEY` | Secret | The real widget secret |
-| `TURNSTILE_SITE_KEY` | Secret or text | The real public site key |
+| `RECAPTCHA_SECRET_KEY` | Secret | The real reCAPTCHA v3 secret |
+| `RECAPTCHA_SITE_KEY` | Secret or text | The public reCAPTCHA v3 site key |
 | `L3_FROM_EMAIL` | Secret or text | The verified sender address |
-| `L3_TO_EMAIL` | Text | `inquiries@l3group.co.za` (already in wrangler.jsonc) |
+
+The receiving address is fixed in the Worker to `inquiries@l3group.co.za`; it cannot be changed by a submitted form field or an old `L3_TO_EMAIL` variable.
 
 For CLI setup, from this repository run:
 
 ```powershell
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put TURNSTILE_SECRET_KEY
-npx wrangler secret put TURNSTILE_SITE_KEY
+npx wrangler secret put RECAPTCHA_SECRET_KEY
+npx wrangler secret put RECAPTCHA_SITE_KEY
 npx wrangler secret put L3_FROM_EMAIL
 npx wrangler deploy
 ```
@@ -43,9 +44,9 @@ The repository now includes the Worker entry point, static asset binding, and ra
 ## Verify after deployment
 
 1. Open `/api/enquiry/config` on the live hostname. It should return only a public `siteKey`, never secrets. A 503 means configuration is incomplete.
-2. Open Contact, complete the CAPTCHA, and submit one clearly labelled test enquiry.
+2. Open Contact, wait for the secure form to become available, and submit one clearly labelled test enquiry. reCAPTCHA v3 is invisible; there is no checkbox.
 3. Confirm receipt in Namecheap, including Spam/Junk. Check the visitor's address is Reply-To and that replying reaches the visitor. Check Resend's delivery status if the accepted message does not reach the inbox.
-4. Check missing, expired, duplicate, wrong-host, and wrong-action CAPTCHA tokens do not send mail. Confirm repeated attempts return 429 and that errors preserve the visitor's input.
+4. Check missing, expired, duplicate, wrong-host, wrong-action, and low-score CAPTCHA tokens do not send mail. Confirm repeated attempts return 429 and that errors preserve the visitor's input.
 5. Check the mobile form. Direct email, phone, and WhatsApp must still work when the online form is unavailable.
 
 ## Abuse and DDoS protection
@@ -62,11 +63,12 @@ npx wrangler deploy --dry-run --outdir .wrangler/dry-run
 node server.mjs
 ```
 
-Without credentials the local form correctly remains unavailable. To test real delivery locally, use separate development widget credentials allowing localhost and an ignored `.env` file with the same setting names as `.dev.vars.example`, then run `node --env-file=.env server.mjs`. Do not allow localhost on the production widget. Never commit `.env`, `.dev.vars`, or secret values.
+Without credentials the local form correctly remains unavailable. To test real delivery locally, use separate development v3 credentials allowing localhost and an ignored `.env` file with the same setting names as `.dev.vars.example`, then run `node --env-file=.env server.mjs`. Do not allow localhost on the production key. Never commit `.env`, `.dev.vars`, or secret values.
 
 ## Official references
 
-- [Server-side Turnstile validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
+- [reCAPTCHA v3 integration](https://developers.google.com/recaptcha/docs/v3)
+- [Server-side SiteVerify](https://developers.google.com/recaptcha/docs/verify)
 - [Worker static asset routing](https://developers.cloudflare.com/workers/static-assets/binding/)
 - [Workers rate-limit binding and its limitations](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/)
 - [Resend domain verification](https://resend.com/docs/dashboard/domains/introduction)

@@ -9,14 +9,14 @@ import worker from '../worker.mjs';
 const env = {
   RESEND_API_KEY: 'test-email-secret', L3_FROM_EMAIL: 'website@forms.example.com',
   L3_TO_EMAIL: 'inquiries@l3group.co.za',
-  TURNSTILE_SITE_KEY: 'test-public-site-key', TURNSTILE_SECRET_KEY: 'test-captcha-secret',
+  RECAPTCHA_SITE_KEY: 'test-public-site-key', RECAPTCHA_SECRET_KEY: 'test-captcha-secret',
 };
 const enquiry = {
   name: 'Test Visitor', email: 'visitor@example.com', location: 'Cape Town',
   service: 'Construction', message: 'A test project enquiry', website: '',
-  'cf-turnstile-response': 'test-token',
+  'g-recaptcha-response': 'test-token',
 };
-const verification = { success: true, hostname: 'l3group.co.za', action: 'enquiry' };
+const verification = { success: true, hostname: 'l3group.co.za', action: 'enquiry', score: 0.9 };
 const url = 'https://l3group.co.za/api/enquiry';
 
 function request(data = enquiry, headers = {}, method = 'POST') {
@@ -26,20 +26,21 @@ function request(data = enquiry, headers = {}, method = 'POST') {
 function harness({ verified = verification, deliveryStatus = 200, delivery = { id: 'mail-123' }, config = env, rateLimit = async () => true } = {}) {
   const calls = [];
   const fetcher = async (endpoint, options) => {
-    calls.push({ endpoint, options, data: JSON.parse(options.body) });
+    calls.push({ endpoint, options, data: endpoint.includes('siteverify') ? Object.fromEntries(new URLSearchParams(options.body)) : JSON.parse(options.body) });
     return endpoint.includes('siteverify') ? Response.json(verified) : Response.json(delivery, { status: deliveryStatus });
   };
   return { calls, send: incoming => handleEnquiry(incoming, config, { clientIp: '192.0.2.1', rateLimit, fetcher }) };
 }
 
-test('verifies CAPTCHA before sending only to the configured mailbox', async () => {
+test('verifies reCAPTCHA v3 before sending only to the production mailbox', async () => {
   const { send, calls } = harness();
   const response = await send(request({ ...enquiry, to: 'attacker@example.com', name: '<b>Visitor</b>', message: '<script>bad()</script>\nNext line' }));
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { ok: true });
   assert.equal(response.headers.get('cache-control'), 'no-store');
-  assert.equal(calls[0].endpoint, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
-  assert.deepEqual(calls[0].data, { secret: env.TURNSTILE_SECRET_KEY, response: 'test-token', remoteip: '192.0.2.1' });
+  assert.equal(calls[0].endpoint, 'https://www.google.com/recaptcha/api/siteverify');
+  assert.equal(calls[0].options.headers['Content-Type'], 'application/x-www-form-urlencoded');
+  assert.deepEqual(calls[0].data, { secret: env.RECAPTCHA_SECRET_KEY, response: 'test-token', remoteip: '192.0.2.1' });
   assert.equal(calls[1].endpoint, 'https://api.resend.com/emails');
   assert.equal(calls[1].options.headers.Authorization, `Bearer ${env.RESEND_API_KEY}`);
   assert.deepEqual(calls[1].data.to, ['inquiries@l3group.co.za']);
@@ -58,10 +59,10 @@ test('default mailbox uses the human-confirmed production mailbox', async () => 
   assert.deepEqual(calls[1].data.to, ['inquiries@l3group.co.za']);
 });
 
-test('server environment can configure the destination; submitted recipient cannot', async () => {
+test('neither environment nor submitted fields can redirect enquiries', async () => {
   const { send, calls } = harness({ config: { ...env, L3_TO_EMAIL: 'approved@example.com' } });
   await send(request({ ...enquiry, L3_TO_EMAIL: 'attacker@example.com' }));
-  assert.deepEqual(calls[1].data.to, ['approved@example.com']);
+  assert.deepEqual(calls[1].data.to, ['inquiries@l3group.co.za']);
 });
 
 test('invalid and overlong fields never reach verification or email providers', async () => {
@@ -75,16 +76,18 @@ test('invalid and overlong fields never reach verification or email providers', 
 });
 
 test('missing, blank, and oversized CAPTCHA tokens never send mail', async () => {
-  for (const token of [undefined, '', ' ', {}, 'x'.repeat(2049)]) {
+  for (const token of [undefined, '', ' ', {}, 'x'.repeat(4097)]) {
     const { send, calls } = harness();
-    assert.equal((await send(request({ ...enquiry, 'cf-turnstile-response': token }))).status, 400);
+    assert.equal((await send(request({ ...enquiry, 'g-recaptcha-response': token }))).status, 400);
     assert.equal(calls.length, 0);
   }
 });
 
-test('failed, expired, duplicate, wrong-host, and wrong-action tokens never send mail', async () => {
+test('failed, expired, duplicate, wrong-host, wrong-action, and low-score tokens never send mail', async () => {
   for (const verified of [{ success: false }, { success: false, 'error-codes': ['timeout-or-duplicate'] },
-    { ...verification, hostname: 'attacker.example' }, { ...verification, action: 'another-form' }, {}, null]) {
+    { ...verification, hostname: 'attacker.example' }, { ...verification, action: 'another-form' },
+    { ...verification, score: 0.49 }, { ...verification, score: undefined },
+    { ...verification, 'error-codes': ['Over free quota.'] }, {}, null]) {
     const { send, calls } = harness({ verified });
     assert.equal((await send(request())).status, 403);
     assert.equal(calls.length, 1);
@@ -98,28 +101,19 @@ test('honeypot submissions silently discard mail', async () => {
 });
 
 test('fails closed if any configuration or the rate limiter is missing', async () => {
-  for (const key of ['RESEND_API_KEY', 'L3_FROM_EMAIL', 'TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY']) {
+  for (const key of ['RESEND_API_KEY', 'L3_FROM_EMAIL', 'RECAPTCHA_SITE_KEY', 'RECAPTCHA_SECRET_KEY']) {
     const { send, calls } = harness({ config: { ...env, [key]: '' } });
     assert.equal((await send(request())).status, 503);
     assert.equal(calls.length, 0);
   }
   assert.equal((await handleEnquiry(request(), env)).status, 503);
-  assert.equal((await harness({ config: { ...env, L3_TO_EMAIL: 'invalid' } }).send(request())).status, 503);
-});
-
-test('rejects public always-pass Turnstile testing credentials', async () => {
-  for (const key of ['TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY']) {
-    const { send, calls } = harness({ config: { ...env, [key]: '1x00000000000000000000AA' } });
-    assert.equal((await send(request())).status, 503);
-    assert.equal(calls.length, 0);
-  }
 });
 
 test('public config exposes only the site key, never secrets or mailbox settings', async () => {
   const { send } = harness();
   const response = await send(new Request(`${url}/config`));
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { siteKey: env.TURNSTILE_SITE_KEY });
+  assert.deepEqual(await response.json(), { siteKey: env.RECAPTCHA_SITE_KEY });
   assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.equal((await harness({ config: {} }).send(new Request(`${url}/config`))).status, 503);
 });
@@ -195,7 +189,7 @@ test('outbound errors and timeouts fail closed without exposing secrets', async 
 test('retries of identical messages use the same email idempotency key', async () => {
   const { send, calls } = harness();
   await send(request());
-  await send(request({ ...enquiry, 'cf-turnstile-response': 'new-token' }));
+  await send(request({ ...enquiry, 'g-recaptcha-response': 'new-token' }));
   await send(request({ ...enquiry, message: 'A different enquiry' }));
   assert.equal(calls[1].options.headers['Idempotency-Key'], calls[3].options.headers['Idempotency-Key']);
   assert.notEqual(calls[1].options.headers['Idempotency-Key'], calls[5].options.headers['Idempotency-Key']);
@@ -241,7 +235,7 @@ test('deployment config runs the API Worker and excludes private assets', async 
   assert.equal(config.main, 'worker.mjs');
   assert.equal(config.assets.binding, 'ASSETS');
   assert.deepEqual(config.assets.run_worker_first, ['/api/*']);
-  assert.equal(config.vars.L3_TO_EMAIL, env.L3_TO_EMAIL);
+  assert.equal(config.vars?.L3_TO_EMAIL, undefined);
   assert.equal(config.ratelimits[0].name, 'ENQUIRY_RATE_LIMITER');
   const ignored = await readFile(new URL('../.assetsignore', import.meta.url), 'utf8');
   for (const pattern of ['.env*', '.dev.vars*', '.git/', 'worker.mjs', 'enquiry.mjs', 'server.mjs', 'tests/']) assert.ok(ignored.includes(pattern));

@@ -92,8 +92,6 @@ body.inner-page {
 .enquiry-form textarea { min-height: 145px; resize: vertical; }
 .enquiry-form .button { width: fit-content; border: 0; cursor: pointer; }
 .enquiry-form .button:disabled { opacity: .55; cursor: not-allowed; }
-.form-verification { width: 100%; min-height: 65px; }
-.form-verification:empty { display: none; }
 .verification-status { margin: 0; color: #c7d2cd; font-size: .85rem; }
 .verification-retry { width: fit-content; border: 1px solid #546163; border-radius: 2px; padding: .55rem .85rem; background: transparent; color: #fff; font: inherit; cursor: pointer; }
 .verification-retry[hidden] { display: none; }

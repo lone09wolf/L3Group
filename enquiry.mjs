@@ -21,12 +21,9 @@ export function jsonResponse(status, body, headers = {}) {
 
 function settings(env) {
   const from = (env.L3_FROM_EMAIL || '').trim();
-  const to = (env.L3_TO_EMAIL || DEFAULT_RECIPIENT).trim();
-  const siteKey = (env.TURNSTILE_SITE_KEY || '').trim();
-  const secret = (env.TURNSTILE_SECRET_KEY || '').trim();
-  // Never activate Cloudflare's public, always-pass testing keys in a deployment.
-  const realKeys = siteKey && secret && !/^[123]x0{10}/.test(siteKey) && !/^[123]x0{10}/.test(secret);
-  return { from, to, siteKey, secret, ready: Boolean(realKeys && env.RESEND_API_KEY && EMAIL.test(from) && EMAIL.test(to)) };
+  const siteKey = (env.RECAPTCHA_SITE_KEY || '').trim();
+  const secret = (env.RECAPTCHA_SECRET_KEY || '').trim();
+  return { from, siteKey, secret, ready: Boolean(siteKey && secret && env.RESEND_API_KEY && EMAIL.test(from)) };
 }
 
 async function readJson(request) {
@@ -123,25 +120,27 @@ export async function handleEnquiry(request, env, { clientIp, rateLimit, fetcher
   if (typeof data.website === 'string' && data.website.trim()) return jsonResponse(200, { ok: true });
   const fields = validateFields(data);
   if (!fields) return jsonResponse(400, { error: 'Please complete every field with valid details.' });
-  const token = data['cf-turnstile-response'];
-  if (typeof token !== 'string' || !token.trim() || token.length > 2048) {
-    return jsonResponse(400, { error: 'Please complete the security check before sending.' });
+  const token = data['g-recaptcha-response'];
+  if (typeof token !== 'string' || !token.trim() || token.length > 4096) {
+    return jsonResponse(400, { error: 'Please retry the security check before sending.' });
   }
   let verified;
   try {
-    verified = await fetchJson(fetcher, 'https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: config.secret, response: token, ...(clientIp ? { remoteip: clientIp } : {}) }),
+    verified = await fetchJson(fetcher, 'https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret: config.secret, response: token, ...(clientIp ? { remoteip: clientIp } : {}) }).toString(),
     }, timeoutMs);
   } catch {
     return jsonResponse(503, { error: 'The security check is temporarily unavailable. Please try again shortly.' });
   }
-  if (verified?.success !== true || verified.hostname !== url.hostname || verified.action !== 'enquiry') {
-    return jsonResponse(403, { error: 'The security check expired or could not be verified. Please complete it again.' });
+  if (verified?.success !== true || verified.hostname !== url.hostname || verified.action !== 'enquiry'
+    || typeof verified.score !== 'number' || verified.score < 0.5 || verified.score > 1
+    || (Array.isArray(verified['error-codes']) && verified['error-codes'].length)) {
+    return jsonResponse(403, { error: 'The security check could not be verified. Please try again or email us directly.' });
   }
   const { name, email, location, service, message } = fields;
   const mail = {
-    from: `L3 Group Website <${config.from}>`, to: [config.to], reply_to: email,
+    from: `L3 Group Website <${config.from}>`, to: [DEFAULT_RECIPIENT], reply_to: email,
     subject: `Website enquiry: ${service}`,
     text: `New L3 Group enquiry\n\nName: ${name}\nEmail: ${email}\nLocation: ${location}\nService: ${service}\n\nProject:\n${message}`,
     html: `<h2>New L3 Group enquiry</h2><p><strong>Name:</strong> ${escapeHtml(name)}</p><p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Location:</strong> ${escapeHtml(location)}</p><p><strong>Service:</strong> ${escapeHtml(service)}</p><p><strong>Project:</strong></p><p>${escapeHtml(message).replace(/\r?\n/g, '<br>')}</p>`,

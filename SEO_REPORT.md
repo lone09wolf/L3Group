@@ -63,7 +63,7 @@ Audit JSON, crawl results and screenshots are saved outside the deployable repos
 
 1. Review the local preview and deploy the tested changes. Confirm the primary origin is the apex domain above; update canonicals, schema, social URLs, sitemap and robots together if a different hostname is chosen.
 2. In Cloudflare, verify HTTP-to-HTTPS and www-to-apex redirects preserve paths and queries. Check `/`, `/services`, `/projects`, `/contact`, old `.html` URLs, `/robots.txt`, `/sitemap.xml` and an invented URL returning 404. Ensure production does not add noindex headers, authentication or crawler-blocking challenges to public pages.
-3. Confirm production Turnstile/email-provider secrets and real delivery to `inquiries@l3group.co.za` using `ENQUIRY-SETUP.md`. No real email was sent during SEO verification; local missing credentials do not prove that production is misconfigured.
+3. Confirm production reCAPTCHA v3/email-provider secrets and real delivery to `inquiries@l3group.co.za` using `ENQUIRY-SETUP.md`. No real email was sent during SEO verification; local missing credentials do not prove that production is misconfigured.
 4. Confirm rights and factual accuracy for project imagery and certification claims before expanding structured data. Supply accurate captions/transcripts for any videos containing meaningful speech.
 5. Follow `SEO_BACKLINK_STRATEGY.md`; no backlinks were fabricated or purchased.
 

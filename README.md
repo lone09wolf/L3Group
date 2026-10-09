@@ -1,13 +1,13 @@
 # L3 Group
 
-A responsive website with Cloudflare Workers hosting, server-verified Turnstile protection, and Resend enquiry delivery. A dependency-free Node server provides the same enquiry API locally. Static-only hosting can display the site but cannot send enquiries.
+A responsive website with Cloudflare Workers hosting, server-verified reCAPTCHA v3 protection, and Resend enquiry delivery. A dependency-free Node server provides the same enquiry API locally. Static-only hosting can display the site but cannot send enquiries.
 
 ## Contact
 
 - Phone: +27 84 498 3650
 - Email: inquiries@l3group.co.za (Namecheap mailbox).
 - The form posts to `/api/enquiry`. The recipient is configured server-side; visitors cannot choose another destination. The verified sending address is used as From, and the visitor's email is Reply-To.
-- The endpoint verifies every Turnstile token's success, hostname, and action before contacting Resend. It rejects cross-origin requests, invalid fields, and bodies over 12 KB, and includes a hidden spam trap.
+- The endpoint verifies every reCAPTCHA v3 token's success, hostname, action, and score before contacting Resend. It rejects cross-origin requests, invalid fields, and bodies over 12 KB, and includes a hidden spam trap.
 - Cloudflare's rate-limit binding limits attempts to five per minute per IP, per Cloudflare location. The local Node server uses a bounded in-memory limiter. These limits are abuse controls, not a global quota or standalone DDoS protection.
 - Identical messages use a Resend idempotency key to prevent duplicate emails for the provider's 24-hour retention window. No automatic provider retry is performed.
 - Missing configuration disables online submission honestly. Direct phone, WhatsApp, and email links remain available. A successful response means Resend accepted the message, not that inbox delivery has been verified.

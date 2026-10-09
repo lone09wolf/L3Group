@@ -12,9 +12,6 @@
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
   },
-  "vars": {
-    "L3_TO_EMAIL": "inquiries@l3group.co.za"
-  },
   "ratelimits": [
     {
       "name": "ENQUIRY_RATE_LIMITER",

@@ -6,33 +6,30 @@ import { runInNewContext } from 'node:vm';
 const source = await readFile(new URL('../enquiry-form.js', import.meta.url), 'utf8');
 const fields = { name: 'Test Visitor', email: 'visitor@example.com', location: 'Cape Town', service: 'Construction', message: 'Test enquiry', website: '' };
 
-async function harness({ config = Response.json({ siteKey: 'test-key' }), delivery = () => Response.json({ ok: true }) } = {}) {
+async function harness({ config = Response.json({ siteKey: 'test-key' }), delivery = () => Response.json({ ok: true }), execute = async () => 'fresh-token' } = {}) {
   const events = new Map();
-  const pageEvents = new Map();
   const calls = [];
+  const executions = [];
   const submit = { disabled: true };
   const status = { textContent: '' };
   const verificationStatus = { textContent: '', after() {} };
-  const retry = { addEventListener() {} };
+  const retry = { addEventListener(name, callback) { events.set('retry', callback); }, hidden: true };
   const service = { options: [{ value: 'Construction' }, { value: 'Renovations' }], value: '' };
-  let options;
   let resets = 0;
-  let widgetResets = 0;
   const form = {
-    querySelector: selector => ({ 'button[type="submit"]': submit, '[data-form-status]': status, '[data-verification-status]': verificationStatus, '[data-form-verification]': {} })[selector],
+    querySelector: selector => ({ 'button[type="submit"]': submit, '[data-form-status]': status, '[data-verification-status]': verificationStatus })[selector],
     elements: { namedItem: () => service },
     addEventListener: (name, callback) => events.set(name, callback),
     reportValidity: () => true, setAttribute() {}, removeAttribute() {},
     reset() { resets++; },
   };
-  const turnstile = {
-    ready(callback) { callback(); }, remove() {},
-    render(container, value) { options = value; return 'widget'; },
-    reset() { widgetResets++; },
+  const grecaptcha = {
+    ready(callback) { callback(); },
+    async execute(key, options) { executions.push({ key, action: options.action }); return execute(); },
   };
   runInNewContext(source, {
     document: { querySelector: () => form, createElement: () => retry },
-    window: { location: { search: '?service=Renovations' }, matchMedia: () => ({ matches: false }), turnstile, addEventListener: (name, callback) => pageEvents.set(name, callback) },
+    window: { location: { search: '?service=Renovations' }, grecaptcha },
     URLSearchParams, AbortSignal, setTimeout, clearTimeout,
     FormData: class { *[Symbol.iterator]() { yield* Object.entries(fields); } },
     fetch: async (url, value) => {
@@ -42,70 +39,60 @@ async function harness({ config = Response.json({ siteKey: 'test-key' }), delive
     },
   });
   await new Promise(resolve => setImmediate(resolve));
-  return { submit, status, verificationStatus, service, calls, retry,
-    options: () => options, send: () => events.get('submit')({ preventDefault() {} }),
-    resets: () => resets, widgetResets: () => widgetResets, pageshow: () => pageEvents.get('pageshow')({ persisted: true }) };
+  return { submit, status, verificationStatus, service, calls, executions, retry,
+    send: () => events.get('submit')({ preventDefault() {} }), resets: () => resets };
 }
 
-test('preselects services and enables sending only after verification', async () => {
+test('preselects service and obtains a fresh v3 token for each submission', async () => {
   const form = await harness();
   assert.equal(form.service.value, 'Renovations');
-  assert.equal(form.submit.disabled, true);
-  await form.send();
-  assert.equal(form.calls.length, 0);
-  form.options().callback('verified-token');
   assert.equal(form.submit.disabled, false);
   await form.send();
-  assert.equal(form.calls[0]['cf-turnstile-response'], 'verified-token');
-  assert.match(form.status.textContent, /has been sent/);
-  assert.equal(form.resets(), 1);
-  assert.equal(form.widgetResets(), 1);
-  assert.equal(form.submit.disabled, true);
-});
-
-test('expired tokens and back-forward restores require new verification', async () => {
-  const form = await harness();
-  form.options().callback('verified-token');
-  form.options()['expired-callback']();
-  assert.equal(form.submit.disabled, true);
-  assert.equal(form.retry.hidden, false);
   await form.send();
-  assert.equal(form.calls.length, 0);
-  form.options().callback('new-token');
-  form.pageshow();
-  assert.equal(form.submit.disabled, true);
-  assert.equal(form.widgetResets(), 1);
+  assert.equal(form.calls.length, 2);
+  assert.equal(form.calls[0]['g-recaptcha-response'], 'fresh-token');
+  assert.deepEqual(form.executions, [
+    { key: 'test-key', action: 'enquiry' }, { key: 'test-key', action: 'enquiry' },
+  ]);
+  assert.match(form.status.textContent, /has been sent/);
+  assert.equal(form.resets(), 2);
+  assert.equal(form.submit.disabled, false);
 });
 
-test('delivery failures preserve input and never claim success', async () => {
-  for (const delivery of [() => Response.json({ error: 'Please wait one minute.' }, { status: 429 }),
-    () => Response.json({ ok: false }), () => new Response('not json'), () => { throw new TypeError('Network failed'); }]) {
-    const form = await harness({ delivery });
-    form.options().callback('verified-token');
+test('delivery and verification failures preserve form input and never claim success', async () => {
+  for (const options of [
+    { delivery: () => Response.json({ error: 'Please wait one minute.' }, { status: 429 }) },
+    { delivery: () => Response.json({ ok: false }) },
+    { delivery: () => new Response('not json') },
+    { delivery: () => { throw new TypeError('Network failed'); } },
+    { execute: async () => { throw new Error('CAPTCHA blocked'); } },
+  ]) {
+    const form = await harness(options);
     await form.send();
     assert.equal(form.resets(), 0);
-    assert.equal(form.widgetResets(), 1);
     assert.doesNotMatch(form.status.textContent, /has been sent/);
-    assert.equal(form.submit.disabled, true);
+    assert.equal(form.submit.disabled, false);
   }
 });
 
 test('missing configuration disables the form and explains direct contact', async () => {
   const form = await harness({ config: Response.json({ error: 'Please email inquiries@l3group.co.za.' }, { status: 503 }) });
   assert.equal(form.submit.disabled, true);
-  assert.equal(form.options(), undefined);
   assert.match(form.verificationStatus.textContent, /inquiries@l3group.co.za/);
   assert.equal(form.retry.hidden, false);
+  await form.send();
+  assert.equal(form.executions.length, 0);
 });
 
 test('ignores duplicate submit events while an enquiry is in flight', async () => {
   let finish;
   const pending = new Promise(resolve => { finish = resolve; });
   const form = await harness({ delivery: () => pending });
-  form.options().callback('verified-token');
   const sending = form.send();
   await form.send();
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(form.calls.length, 1);
+  assert.equal(form.executions.length, 1);
   assert.equal(form.submit.disabled, true);
   finish(Response.json({ ok: true }));
   await sending;
